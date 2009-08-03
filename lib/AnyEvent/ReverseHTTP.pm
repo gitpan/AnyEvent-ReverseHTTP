@@ -2,7 +2,7 @@ package AnyEvent::ReverseHTTP;
 
 use strict;
 use 5.008_001;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use Carp;
 use AnyEvent::Util;
@@ -25,7 +25,11 @@ has endpoint => (
 has label => (
     is => 'rw', isa => 'Str',
     required => 1,
-    lazy => 1, default => sub { "anyevent" . int rand 100000 },
+    lazy => 1, default => sub {
+        require Digest::SHA;
+        require Time::HiRes;
+        return Digest::SHA::sha1_hex($$ . Time::HiRes::gettimeofday() . {});
+    },
 );
 
 has token => (
@@ -67,7 +71,7 @@ sub connect {
 
     my $body = join "&", map "$_=" . URI::Escape::uri_escape($query{$_}), keys %query;
 
-    my $guard = http_post $self->endpoint, $body, sub {
+    http_post $self->endpoint, $body, sub {
         my($body, $hdr) = @_;
 
         if ($hdr->{Status} eq '201' || $hdr->{Status} eq '204') {
@@ -127,7 +131,7 @@ sub connect {
         http_get $url, $poller;
     };
 
-    return AnyEvent::Util::guard { undef $guard; undef $self };
+    return AnyEvent::Util::guard { undef $self };
 }
 
 sub _extract_link {
