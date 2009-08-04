@@ -2,7 +2,7 @@ package AnyEvent::ReverseHTTP;
 
 use strict;
 use 5.008_001;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Carp;
 use AnyEvent::Util;
@@ -86,6 +86,7 @@ sub connect {
 
             if ($hdr->{Status} eq '200') {
                 my $req  = HTTP::Request->parse($body);
+                $req->header('Requesting-Client', $hdr->{'requesting-client'});
                 my $res  = $self->on_request->($req);
 
                 my $postback = sub {
