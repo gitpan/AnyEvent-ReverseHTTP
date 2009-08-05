@@ -2,7 +2,7 @@ package AnyEvent::ReverseHTTP;
 
 use strict;
 use 5.008_001;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Carp;
 use AnyEvent::Util;
@@ -34,6 +34,7 @@ has label => (
 
 has token => (
     is => 'rw', isa => 'Str',
+    default => '-',
 );
 
 has on_register => (
@@ -160,7 +161,7 @@ AnyEvent::ReverseHTTP - reversehttp for AnyEvent
   use AnyEvent::ReverseHTTP;
 
   # simple Hello World server
-  my $guard = reverse_http "myserver123", sub {
+  my $guard = reverse_http "myserver123", "token", sub {
       my $req = shift;
       return "Hello World"; # You can return HTTP::Response object for more control
   };
@@ -169,7 +170,7 @@ AnyEvent::ReverseHTTP - reversehttp for AnyEvent
   my $server = AnyEvent::ReverseHTTP->new(
       endpoint => "http://www.reversehttp.net/reversehttp",
       label    => "aedemo1234",
-      token    => "-", # optional
+      token    => "mytoken",
   );
 
   $server->on_register(sub {
